@@ -116,7 +116,6 @@ def main():
     while True:
         ret, frame = cap.read() if (cap is not None and cap.isOpened()) else (False, None)
 
-        # Aguarda o aquecimento inicial do sensor (LED da webcam) sem fechar o programa
         if not ret or frame is None:
             falhas_aquecimento += 1
             tela_espera = np.full((480, 640, 3), (30, 30, 30), dtype=np.uint8)
@@ -220,7 +219,6 @@ def main():
                     status_texto = "POSTURA CORRETA"
                     cor_status = (0, 200, 0)  # VERDE
 
-                # Desenha as linhas de alinhamento no corpo
                 p_ombro_esq = (int(ombro_esq[0]), int(ombro_esq[1]))
                 p_ombro_dir = (int(ombro_dir[0]), int(ombro_dir[1]))
 
@@ -232,24 +230,20 @@ def main():
                 cv2.circle(frame, ponto_medio_orelhas, 8, cor_status, -1)
                 cv2.circle(frame, ponto_medio_ombros, 8, cor_status, -1)
 
-        # Efeito visual vermelho na tela inteira quando o alerta dispara
         if alerta_vermelho_ativo:
             pulso = 0.18 + 0.10 * math.sin(time.time() * 10.0)
             camada_vermelha = np.full_like(frame, (0, 0, 255))
             cv2.addWeighted(camada_vermelha, pulso, frame, 1.0 - pulso, 0, frame)
 
-        # Borda colorida ao redor de toda a janela (Verde / Amarelo / Vermelho)
         espessura_borda = 14 if alerta_vermelho_ativo else 6
         cv2.rectangle(frame, (0, 0), (largura - 1, altura - 1), cor_status, espessura_borda)
 
-        # Barra superior de status
         cv2.rectangle(frame, (0, 0), (largura, 58), cor_status, -1)
         cv2.putText(
             frame, status_texto, (18, 39),
             cv2.FONT_HERSHEY_SIMPLEX, 0.78, (255, 255, 255), 2, cv2.LINE_AA
         )
 
-        # Painel discreto de métricas
         cv2.rectangle(frame, (15, 70), (350, 165), (25, 25, 25), -1)
         cv2.putText(
             frame, f"Indice Vertical: {razao_pescoco_atual:.2f} (Base: {razao_pescoco_base:.2f})",
